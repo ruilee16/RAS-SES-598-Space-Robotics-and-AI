@@ -163,7 +163,7 @@ Overall, the system demonstrates strong performance across perception, planning,
 
 ---
 
-## 8. Appendix: Mission Log Summary
+## 7. Appendix: Mission Log Summary
 
 - Battery start: 0.9889  
 - Battery end: 0.9889  
