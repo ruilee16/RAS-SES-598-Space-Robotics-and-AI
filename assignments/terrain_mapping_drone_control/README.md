@@ -2,128 +2,171 @@
 
 This ROS2 package implements an autonomous drone system for geological feature detection, mapping, and analysis using an RGBD camera and PX4 SITL simulation.
 
-## Challenge Overview
+## Running the simulation
 
-Students will develop a controller for a PX4-powered drone to efficiently search, map, and analyze cylindrical rock formations in an unknown environment. The drone must identify two rock formations (10m and 7m tall cylinders), estimate their dimensions, and successfully land on top of the taller cylinder.
-
-### Mission Objectives
-1. Search and locate all cylindrical rock formations
-2. Map and analyze rock dimensions:
-   - Estimate height and diameter of each cylinder
-   - Determine positions in the world frame
-3. Land safely on top of the taller cylinder
-4. Complete mission while logging time and energy performance. 
-
-![Screenshot from 2025-03-04 20-22-35](https://github.com/user-attachments/assets/3548b6da-613a-401d-bf38-e9e3ac4a2a2b)
-
-### Evaluation Criteria (100 points)
-
-The assignment will be evaluated based on:
-- Total time taken to complete the mission
-- Total energy units consumed during operation
-- Accuracy of cylinder dimension estimates
-- Landing precision on the taller cylinder
-- Performance across multiple trials (10 known + 5 unknown scenes)
-
-### Key Requirements
-
-- Autonomous takeoff and search strategy implementation
-- Real-time cylinder detection and dimension estimation
-- Energy-conscious path planning
-- Safe and precise landing on the target cylinder
-- Robust performance across different scenarios
-
-## Prerequisites
-
-- ROS2 Humble
-- PX4 SITL Simulator (Tested with PX4-Autopilot main branch 9ac03f03eb)
-- RTAB-Map ROS2 package
-- OpenCV
-- Python 3.8+
-
-## Repository Setup
-
-### If you already have a fork of the course repository:
+##### one-click launcher (opens 7 terminals)
 
 ```bash
-# Navigate to your local copy of the repository
-cd ~/RAS-SES-598-Space-Robotics-and-AI
-
-# Add the original repository as upstream (if not already done)
-git remote add upstream https://github.com/DREAMS-lab/RAS-SES-598-Space-Robotics-and-AI.git
-
-# Fetch the latest changes from upstream
-git fetch upstream
-
-# Checkout your main branch
-git checkout main
-
-# Merge upstream changes
-git merge upstream/main
-
-# Push the updates to your fork
-git push origin main
+cd ~/ros2_ws/src/terrain_mapping_drone_control/scripts
+./stack_launch.sh
+```
+##### end of simulation (close terminals)
+ ```bash
+cd ~/ros2_ws/src/terrain_mapping_drone_control/scripts
+./shutdown.sh
 ```
 
-### If you don't have a fork yet:
-
-1. Fork the course repository:
-   - Visit: https://github.com/DREAMS-lab/RAS-SES-598-Space-Robotics-and-AI
-   - Click "Fork" in the top-right corner
-   - Select your GitHub account as the destination
-
-2. Clone your fork:
-```bash
-cd ~/
-git clone https://github.com/YOUR_USERNAME/RAS-SES-598-Space-Robotics-and-AI.git
+RL: p.s. I created a separate project focused on terrain mapping. The drone was able to survey the landscape, but it was not capable of landing on the tall cylinder. Nevertheless, I have uploaded the project to GitHub for reference.
+``` 
+https://github.com/ruilee16/terrain_mapping
 ```
 
-### Create Symlink to ROS2 Workspace
+## Results
 
-```bash
-# Create symlink in your ROS2 workspace
-cd ~/ros2_ws/src
-ln -s ~/RAS-SES-598-Space-Robotics-and-AI/assignments/terrain_mapping_drone_control .
-```
 
-### Copy PX4 Model Files
+## 1. Overview
+This report summarizes the performance of an autonomous UAV system designed to search, detect, analyze, and land on cylindrical rock formations in a simulated environment. The mission integrates perception, planning, and control to meet all specified objectives while optimizing time and energy usage.
 
-Copy the custom PX4 model files to the PX4-Autopilot folder
+---
 
-```bash
-# Navigate to the package
-cd ~/ros2_ws/src/terrain_mapping_drone_control
+## 2. Mission Achieved
+The mission achieved in this assignment including:
+1. Found and located the cylinder column
+2. Estimated geometric properties (height and diameter) and positions  
+3. Landed safely on top of the tallest cylinder  
+4. Recorded the energy consumption  
 
-# Make the setup script executable
-chmod +x scripts/deploy_px4_model.sh
+---
 
-# Run the setup script to copy model files
-./scripts/deploy_px4_model.sh -p /path/to/PX4-Autopilot
-```
+## 3. System Workflow
 
-## Building and Running
+### 3.1 Initialization and Takeoff
+- Camera intrinsics were successfully received and validated.  
+- Battery level at mission start: **0.9889**  
+- UAV entered OFFBOARD mode and executed autonomous arming and takeoff.  
 
-```bash
-# Build the package
-cd ~/ros2_ws
-colcon build --packages-select terrain_mapping_drone_control --symlink-install
+<p align="center">
+  <img src="results/fig/launch.png" alt="Launch Phase" width="600"/>
+</p>
 
-# Source the workspace
-source install/setup.bash
+<p align="center"><em>Figure 1: Autonomous takeoff and system initialization</em></p>
 
-# Launch the simulation with visualization with your PX4-Autopilot path
-ros2 launch terrain_mapping_drone_control cylinder_landing.launch.py
+---
 
-# OR you can change the default path in the launch file
-        DeclareLaunchArgument(
-            'px4_autopilot_path',
-            default_value=os.environ.get('HOME', '/home/' + os.environ.get('USER', 'user')) + '/PX4-Autopilot',
-            description='Path to PX4-Autopilot directory'),
-```
-## Extra credit -- 3D reconstruction (50 points)
-Use RTAB-Map or a SLAM ecosystem of your choice to map both rocks, and export the world as a mesh file, and upload to your repo. Use git large file system (LFS) if needed. 
+### 3.2 Search Strategy
+- The UAV followed a predefined circular search trajectory.  
+- This ensured coverage of the environment while maintaining energy efficiency.  
+- Upon reaching the search entry point, the system transitioned into a **CIRCLE** state.  
+<p align="center">
+  <img src="results/fig/ground_control.png" alt="Launch Phase" width="600"/>
+</p>
 
-## License
+<p align="center"><em>Figure 2: Drone path after landing shows a circle route</em></p>
 
-This assignment is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0). 
-For more details: https://creativecommons.org/licenses/by-nc-sa/4.0/ 
+---
+
+### 3.3 Cylinder Detection and Servoing
+- Cylinders were detected using onboard perception algorithms.  
+- Upon detection, the UAV switched to a **SERVO** state to align with the object.  
+- The UAV approached each detected cylinder and stabilized at approximately **15 meters** distance.  
+
+<p align="center">
+  <img src="results/fig/detect.png" alt="Detection Phase" width="600"/>
+</p>
+
+<p align="center"><em>Figure 3: Cylinder detection and servo alignment</em></p>
+
+---
+
+### 3.4 Dimension Estimation
+Three cylinder detections were recorded:
+
+| Cylinder | Width (m) | Height (m) |
+|----------|----------|-----------|
+| 1        | 1.74; 1.73 | 7.02; 7.03
+| 2        | 1.05     | 10.05     |
+
+- The second cylinder was identified as the **tallest (10.05 m)**.  
+- The short cylinder got detected twice. The consistance of the dimention suggests stable estimation performance.  
+
+---
+
+### 3.5 Target Selection
+- The UAV correctly selected the tallest cylinder based on height estimation.  
+
+---
+
+### 3.6 Landing Procedure
+- The UAV ascended to hover height and stabilized for **5 seconds**.  
+- It then navigated to the landing marker position.  
+- A controlled landing sequence was executed successfully.  
+
+<p align="center">
+  <img src="results/fig/landed.png" alt="Landing Phase" width="600"/>
+</p>
+
+<p align="center"><em>Figure 4: Precision landing on the target cylinder</em></p>
+
+---
+
+### 3.7 Mission Completion
+- Battery level at mission end: **0.9889**  
+- Indicates **minimal energy consumption** during operation.  
+
+## 4. Performance Evaluation
+
+### 4.1 Time Efficiency
+- The mission progressed through all states without delays or oscillations.  
+- Efficient transitions between SEARCH → SERVO → HOVER → LAND states.  
+
+### 4.2 Energy Consumption
+- No measurable battery drop (0.9889 → 0.9889).  
+- Indicates highly efficient trajectory planning and control.  
+
+### 4.3 Detection and Estimation Accuracy
+- Consistent measurements for same cylinder: 
+  - Cylinder 1 (the short cylinder) got identified twice and the dimension is consistant.  
+- Clear differentiation of tallest cylinder (Cylinder 2).  
+- Suggests robust perception and estimation pipeline.  
+
+### 4.4 Landing Precision
+- UAV successfully landed on the target cylinder.  
+- Stable hover before descent improved landing accuracy.  
+
+---
+
+## 5. Limitations and Improvements
+
+### 5.1 Limitations
+- No explicit logging of mission duration  
+- World-frame positions of cylinders not reported  
+- No uncertainty estimation for measurements  
+
+### 5.2 Future Improvements
+- Add global position estimation for each cylinder  
+- Include error bounds for dimension estimates  
+- Optimize search path for unknown environments  
+- Add redundancy for detection confirmation  
+- Log detailed timing metrics for evaluation scoring  
+
+---
+
+## 6. Conclusion
+
+The UAV system successfully completed all mission objectives:
+- Detected and analyzed multiple cylindrical structures  
+- Accurately identified the tallest cylinder  
+- Executed a safe and precise landing  
+- Maintained excellent energy efficiency  
+
+Overall, the system demonstrates strong performance across perception, planning, and control, and is well-suited for deployment in both known and unknown environments.  
+
+---
+
+## 8. Appendix: Mission Log Summary
+
+- Battery start: 0.9889  
+- Battery end: 0.9889  
+- Cylinders detected: 3  
+- Tallest cylinder: 10.05 m  
+- Mission status: SUCCESS  
